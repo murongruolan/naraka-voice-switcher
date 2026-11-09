@@ -518,6 +518,15 @@ OpResult op_apply(bool full_mode) {
 
     // 备份安全策略: .bak 只允许是官方中文, 绝不被我们的构建覆盖。
     // 判定"当前文件是工具构建过的": 部署时写入指纹标记 (ChineseCN.pck.nvt = 部署哈希), 与现文件哈希一致即为自产
+    if (!full_mode) {
+        std::vector<uint32_t> role_ids_pre;
+        for (const auto& r : ROLE_TABLE) {
+            if (!g_sel_roles.count(r.en)) continue;
+            for (int c = 0; c < 4; c++) role_ids_pre.push_back(fnv1_str(std::string(BANK_PREFIXES[c]) + r.en));
+        }
+        if (role_ids_pre.empty() && !g_sel_sys)
+            return {false, L"请先勾选要替换的角色 (或切到「全量替换」)", L""};
+    }
     std::wstring cur_hash = utf8_to_wide(sha256_file(pck));
     bool cur_is_ours = (!cur_hash.empty() && marker_read() == cur_hash);
     if (!file_exists(bak)) {

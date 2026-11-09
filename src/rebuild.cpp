@@ -147,9 +147,9 @@ std::string sha256_file(const std::wstring& path) {
 #endif
     if (!fp) return "";
     Sha256 s;
-    uint8_t buf[1 << 20];
+    std::vector<uint8_t> buf(1 << 20);   // 堆分配: 工作线程栈仅 1MB, 栈上 1MB 缓冲会溢出
     size_t n;
-    while ((n = std::fread(buf, 1, sizeof(buf), fp)) > 0) s.update(buf, n);
+    while ((n = std::fread(buf.data(), 1, buf.size(), fp)) > 0) s.update(buf.data(), n);
     std::fclose(fp);
     return s.hex();
 }
