@@ -688,8 +688,7 @@ std::wstring cur_state_short() {
     if (g_state == "jp") return lang + L"配音(全部)";
     if (g_jp_roles > 0) return L"部分替换 " + std::to_wstring(g_jp_roles) + L"/" +
                                  std::to_wstring((int)ROLE_TABLE.size()) + L"(" + lang + L")";
-    if (g_state == "cn") return L"中文原版";
-    return L"未知";
+        return L"中文原版";
 }
 
 std::wstring phase_text() {
