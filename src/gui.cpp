@@ -647,7 +647,7 @@ enum {
     IDC_PROGRESS = 1160, IDC_ST_PHASE = 1161, IDC_ST_PCT = 1165,
     IDC_BTN_APPLY_FULL = 1162, IDC_BTN_APPLY_ROLES = 1163,
     IDC_BTN_RESTORE = 1164,
-    IDC_BTN_ALL = 1330, IDC_BTN_NONE = 1331, IDC_BTN_SYS = 1332,
+    IDC_BTN_ALL = 1340, IDC_BTN_NONE = 1341, IDC_BTN_SYS = 1342,   // 芯片区 1301..1301+N, 功能键留在区间外
     IDC_ST_MSG = 1171, IDC_ST_DISC = 1172,
     IDC_LINE3 = 1190,
     IDC_CHIP_BASE = 1301,   // 1301..1326 = 角色芯片 (26 个), 与上方按钮 ID 不重叠
@@ -1100,8 +1100,15 @@ LRESULT CALLBACK wndproc(HWND h, UINT m, WPARAM w, LPARAM l) {
         // 小按钮
         if (id == IDC_BTN_GAME || id == IDC_BTN_JP || id == IDC_BTN_ALL || id == IDC_BTN_NONE) {
             bool enabled = !(d->itemState & ODS_DISABLED);
+            bool all_sel = true, any_sel = false;
+            for (const auto& r : ROLE_TABLE) if (g_sel_roles.count(r.en)) { any_sel = true; break; }
+            for (const auto& r : ROLE_TABLE) if (!g_sel_roles.count(r.en)) { all_sel = false; break; }
             COLORREF face = enabled ? RGB(52, 64, 94) : RGB(32, 37, 48);
             COLORREF txt  = enabled ? RGB(182, 208, 255) : RGB(96, 104, 120);
+            if (id == IDC_BTN_ALL && enabled) {
+                if (all_sel)      { face = RGB(34, 120, 80); txt = RGB(190, 255, 220); }
+                else if (any_sel) { face = RGB(96, 84, 40);  txt = RGB(255, 226, 150); }
+            }
             paint_big_btn(d->hDC, d->rcItem, enabled, face);
             paint_btn_text(d->hDC, d->rcItem, d->hwndItem, txt, g_f_lbl);
             return TRUE;
@@ -1128,8 +1135,12 @@ LRESULT CALLBACK wndproc(HWND h, UINT m, WPARAM w, LPARAM l) {
                 if (g_sel_roles.count(en)) g_sel_roles.erase(en); else g_sel_roles.insert(en);
                 save_config(); refresh_texts();
                 InvalidateRect((HWND)l, nullptr, TRUE);
+                InvalidateRect(GetDlgItem(g_hwnd, IDC_BTN_ALL), nullptr, TRUE);
             } else if (id == IDC_BTN_ALL) {
-                for (const auto& r : ROLE_TABLE) g_sel_roles.insert(r.en);
+                bool all_sel = true;
+                for (const auto& r : ROLE_TABLE) if (!g_sel_roles.count(r.en)) { all_sel = false; break; }
+                if (all_sel) g_sel_roles.clear();
+                else for (const auto& r : ROLE_TABLE) g_sel_roles.insert(r.en);
                 save_config(); refresh_texts();
                 InvalidateRect(h, nullptr, TRUE);
             } else if (id == IDC_BTN_NONE) {
@@ -1140,6 +1151,7 @@ LRESULT CALLBACK wndproc(HWND h, UINT m, WPARAM w, LPARAM l) {
                 g_sel_sys = !g_sel_sys;
                 save_config(); refresh_texts();
                 InvalidateRect((HWND)l, nullptr, TRUE);
+                InvalidateRect(GetDlgItem(g_hwnd, IDC_BTN_ALL), nullptr, TRUE);
             } else if (id == IDC_BTN_GAME) {
                 wchar_t file[MAX_PATH] = L"";
                 OPENFILENAMEW of{};
