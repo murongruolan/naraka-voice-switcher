@@ -22,6 +22,7 @@
 #include <objbase.h>
 #include <shobjidl.h>
 #include <shlobj.h>
+#include <algorithm>
 #include "gui.h"
 #include "akpk.h"
 #include "rebuild.h"
@@ -405,7 +406,8 @@ void load_config() {
     std::string s(8192, 0);
     size_t n = std::fread(&s[0], 1, s.size(), f);
     std::fclose(f);
-    s.resize(n);
+            s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());   // 兼容 CRLF 配置
+        s.resize(n);
     if (s.rfind("\xEF\xBB\xBF", 0) == 0) s.erase(0, 3);
     auto line_of = [&](size_t at) {
         size_t e = s.find('\n', at);
@@ -443,6 +445,16 @@ void resolve_all() {
     g_bak_ok = g_game_ok && file_exists(bak_path());
     if (!g_sel_jp.empty()) {
         g_lang_refs = find_all_lang_pcks(g_sel_jp);
+        {
+            FILE* df = _wfopen((fs::path(tool_dir()) / L"gui_debug.log").c_str(), L"ab");
+            if (df) {
+                std::string uj = wide_to_utf8(g_sel_jp);
+                std::fprintf(df, "[resolve] sel_len=%zu sel=%s refs=%zu\n", g_sel_jp.size(), uj.c_str(), g_lang_refs.size());
+                for (auto& r : g_lang_refs)
+                    std::fprintf(df, "[resolve]   ref: %s\n", wide_to_utf8(r.path).c_str());
+                std::fclose(df);
+            }
+        }
         for (auto& r : g_lang_refs)
             if (!g_langref_file.empty() && _wcsicmp(r.file.c_str(), g_langref_file.c_str()) == 0) {
                 g_jp_pck = r.path; break;
@@ -1305,6 +1317,14 @@ int run_gui() {
     if (!h) return 1;
 
     load_config();
+    {
+        FILE* df = _wfopen((fs::path(tool_dir()) / L"gui_debug.log").c_str(), L"ab");
+        if (df) {
+            std::string uj = wide_to_utf8(g_sel_jp);
+            std::fprintf(df, "[load] sel_jp=%s\n", uj.c_str());
+            std::fclose(df);
+        }
+    }
     if (g_sel_game.empty()) g_sel_game = auto_detect_game_exe();
     if (g_sel_game.empty()) {
         static const char* cands[] = {
