@@ -1,0 +1,18 @@
+# 授权声明 (License)
+
+本项目（NarakaVoiceTool，永劫无间语音切换助手）的源代码采用
+**Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** 授权。
+
+全文见: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+## 要点
+
+- **署名 (BY)**：使用、修改、分发本代码或其衍生版本，必须以显著方式注明原作者与本项目来源，
+  并保留原仓库链接: https://github.com/murongruolan/naraka-voice-switcher
+- **非商用 (NC)**：不得将本代码、衍生代码或其编译产物用于任何商业目的。
+- 使用/修改/分发本代码即视为接受上述条款。
+
+## 补充
+
+- 本工具仅操作本地音频资源文件，不含任何游戏版权音频；游戏音频版权归原厂商所有。
+- 本项目仅供个人学习研究使用。
