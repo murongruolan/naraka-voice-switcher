@@ -1310,7 +1310,7 @@ int run_gui() {
     compute_layout();
     RECT r{0, 0, 560, g_client_h};
     AdjustWindowRect(&r, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, FALSE);
-    HWND h = CreateWindowW(wc.lpszClassName, L"永劫无间 · 语音切换助手",
+    HWND h = CreateWindowW(wc.lpszClassName, L"语音切换助手",
                            WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
                            CW_USEDEFAULT, CW_USEDEFAULT, r.right - r.left, r.bottom - r.top,
                            nullptr, nullptr, wc.hInstance, nullptr);
